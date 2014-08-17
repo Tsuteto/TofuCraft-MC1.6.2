@@ -18,6 +18,7 @@ import net.minecraft.stats.StatList;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.MinecraftForge;
 import tsuteto.tofu.block.TcBlock;
+import tsuteto.tofu.dispanse.DispenserBehaviorNigari;
 import tsuteto.tofu.eventhandler.TcCraftingHandler;
 import tsuteto.tofu.util.IIdEntry;
 import tsuteto.tofu.util.IdEntryArmor;
@@ -524,6 +525,7 @@ public class TcItem extends Item
                 .setCreativeTab(CreativeTabs.tabMaterials);
         ModLoader.addName(nigari, "en_US", "Nigari");
         ModLoader.addName(nigari, "ja_JP", "にがり");
+        BlockDispenser.dispenseBehaviorRegistry.putObject(nigari, new DispenserBehaviorNigari());
 
         // Tofu Cake
         tofuCake = $("tofuCake", new ItemTcReed(Id.tofuCake.getId(), TcBlock.tofuCake))

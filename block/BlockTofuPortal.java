@@ -20,6 +20,7 @@ import tsuteto.tofu.dimension.DimensionTeleportation;
 import tsuteto.tofu.entity.EntityTofuPortalFX;
 import tsuteto.tofu.params.DataType;
 import tsuteto.tofu.params.EntityInfo;
+import tsuteto.tofu.params.PortalTripInfo;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
@@ -315,7 +316,7 @@ public class BlockTofuPortal extends BlockBreakable
                         
                         TcAchievementMgr.achieve((EntityPlayerMP)par5Entity, Key.tofuWorld);
                     }
-                    pinfo.set(par5Entity.entityId, DataType.TicksPortalCooldown, 0);
+                    pinfo.set(par5Entity.entityId, DataType.TicksPortalCooldown, this.getNewTripInfo(par5Entity.dimension));
                 }
                 else
                 {
@@ -325,16 +326,25 @@ public class BlockTofuPortal extends BlockBreakable
                         Entity traveledEntity = this.travelToDimension(var3, par5Entity);
                         if (traveledEntity != null)
                         {
-                            pinfo.set(traveledEntity.entityId, DataType.TicksPortalCooldown, 0);
+                            pinfo.set(traveledEntity.entityId, DataType.TicksPortalCooldown, this.getNewTripInfo(traveledEntity.dimension));
                         }
                     }
                     else
                     {
-                        pinfo.set(par5Entity.entityId, DataType.TicksPortalCooldown, 0);
+                        PortalTripInfo info = pinfo.get(par5Entity.entityId, DataType.TicksPortalCooldown);
+                        info.ticksCooldown = 0;
                     }
                 }
             }
         }
+    }
+
+    private PortalTripInfo getNewTripInfo(int tripTo)
+    {
+        PortalTripInfo info = new PortalTripInfo();
+        info.ticksCooldown = 0;
+        info.dimensionIdTripTo = tripTo;
+        return info;
     }
 
     @SideOnly(Side.CLIENT)

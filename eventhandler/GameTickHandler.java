@@ -2,8 +2,12 @@ package tsuteto.tofu.eventhandler;
 
 import java.util.EnumSet;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
 import tsuteto.tofu.params.DataType;
 import tsuteto.tofu.params.EntityInfo;
+import tsuteto.tofu.params.PortalTripInfo;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
@@ -13,8 +17,6 @@ public class GameTickHandler implements ITickHandler
     @Override
     public void tickStart(EnumSet<TickType> type, Object... tickData)
     {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -22,21 +24,30 @@ public class GameTickHandler implements ITickHandler
     {
         // 
         EntityInfo pinfo = EntityInfo.instance();
-        Integer[] array = pinfo.getEntitySet().toArray(new Integer[0]);
-        for (int i = 0; i < array.length; i++)
+        Integer[] array = pinfo.getEntitySet().toArray(new Integer[pinfo.getEntitySet().size()]);
+        for (Integer entityId : array)
         {
-            int entityId = array[i];
             if (pinfo.doesDataExist(entityId, DataType.TicksPortalCooldown))
             {
-                int ticks = pinfo.get(entityId, DataType.TicksPortalCooldown);
-    
-                if (ticks >= 20)
+                PortalTripInfo info = pinfo.get(entityId, DataType.TicksPortalCooldown);
+                MinecraftServer server = MinecraftServer.getServer();
+                World world = server.worldServerForDimension(info.dimensionIdTripTo);
+                if (world != null)
                 {
-                    pinfo.remove(entityId, DataType.TicksPortalCooldown);
-                }
-                else
-                {
-                    pinfo.set(entityId, DataType.TicksPortalCooldown, ++ticks);
+                    Entity entity = world.getEntityByID(entityId);
+                    if (entity != null && entity.addedToChunk && entity.worldObj.blockExists(
+                            (int)entity.posX, (int)entity.posY, (int)entity.posZ))
+                    {
+                        int ticks = info.ticksCooldown;
+                        if (ticks >= 20)
+                        {
+                            pinfo.remove(entityId, DataType.TicksPortalCooldown);
+                        }
+                        else
+                        {
+                            info.ticksCooldown += 1;
+                        }
+                    }
                 }
             }
         }

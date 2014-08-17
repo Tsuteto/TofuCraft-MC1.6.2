@@ -84,7 +84,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * @author Tsuteto
  *
  */
-@Mod(modid = TofuCraftCore.modid, version = "1.5.14-MC1.6.2", acceptedMinecraftVersions = "[1.6.2,1.7)")
+@Mod(modid = TofuCraftCore.modid, version = "1.5.15-MC1.6.2", acceptedMinecraftVersions = "[1.6.2,1.7)")
 @NetworkMod(
     clientSideRequired = true, serverSideRequired = false,
     channels = {

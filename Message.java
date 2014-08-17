@@ -1,5 +1,23 @@
 package tsuteto.tofu;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.regex.Pattern;
+
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 
 public class Message
@@ -47,6 +65,9 @@ public class Message
         $("tofucraft.update.server", "ja_JP", "豆腐Craft %1$sに更新しました! ダウンロード: %2$s");
         $("tofucraft.update.client", "en_US", "§eTofuCraft§r updated to §a%1$s§r! Available at %2$s");
         $("tofucraft.update.client", "ja_JP", "§e豆腐Craft§r §a%1$s§rに更新しました! ダウンロード: %2$s");
+
+        loadLocalization("/assets/tofucraft/lang/zh_CN.lang", "zh_CN", false);
+        
     }
     
     private static void $(String key, String value)
@@ -57,5 +78,58 @@ public class Message
     private static void $(String key, String lang, String value)
     {
         LanguageRegistry.instance().addStringLocalization(key, lang, value);
+    }
+    
+    public static void loadLocalization(String localizationFile, String lang, boolean isXML)
+    {
+        URL urlResource = LanguageRegistry.class.getResource(localizationFile);
+        try
+        {
+            Map<String, String> langPack = parseLangFile(urlResource.openStream());
+        
+            for (Entry<String, String> entry : langPack.entrySet())
+            {
+                LanguageRegistry.instance().addStringLocalization(entry.getKey(), lang, entry.getValue());
+            }
+        }
+        catch (IOException e)
+        {
+            FMLLog.log(Level.SEVERE, e, "Unable to load localization from file %s", localizationFile);
+        }
+    }
+    
+    private static final Splitter equalSignSplitter = Splitter.on('=').limit(2);
+    private static final Pattern numericVariablePattern = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
+    
+    public static HashMap<String,String> parseLangFile(InputStream inputStreamReader)
+    {
+        HashMap<String,String> table = Maps.newHashMap();
+        try
+        {
+            Iterator iterator = IOUtils.readLines(inputStreamReader, Charsets.UTF_8).iterator();
+
+            while (iterator.hasNext())
+            {
+                String s = (String)iterator.next();
+
+                if (!s.isEmpty() && s.charAt(0) != 35)
+                {
+                    String[] astring = Iterables.toArray(equalSignSplitter.split(s), String.class);
+
+                    if (astring != null && astring.length == 2)
+                    {
+                        String s1 = astring[0];
+                        String s2 = numericVariablePattern.matcher(astring[1]).replaceAll("%$1s");
+                        table.put(s1, s2);
+                    }
+                }
+            }
+
+        }
+        catch (Exception ioexception)
+        {
+            ;
+        }
+        return table;
     }
 }

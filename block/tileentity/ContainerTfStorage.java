@@ -30,6 +30,7 @@ public class ContainerTfStorage extends ContainerTfMachine
 
     public ContainerTfStorage(InventoryPlayer invPlayer, TileEntityTfStorage machine)
     {
+        super(machine);
         this.machine = machine;
         this.addSlotToContainer(new SlotTfStorage(invPlayer.player, machine, TileEntityTfStorage.SLOT_INPUT_ITEM, 45, 22));
         this.addSlotToContainer(new Slot(machine, TileEntityTfStorage.SLOT_INPUT_CONTAINER_ITEM, 18, 22));
@@ -201,76 +202,18 @@ public class ContainerTfStorage extends ContainerTfMachine
         return this.machine.isUseableByPlayer(par1EntityPlayer);
     }
 
-    /**
-     * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
-     */
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2)
+    public TransferResult transferStackInMachineSlot(EntityPlayer player, int slot, ItemStack itemStack)
     {
-        // 0-2: Salt furnace inventory
-        // 3-29: Player inventory
-        // 30-38: Hot bar in the player inventory
-        
-        ItemStack var3 = null;
-        Slot var4 = (Slot)this.inventorySlots.get(par2);
-
-        if (var4 != null && var4.getHasStack())
+        if (TfMaterialRegistry.isTfMaterial(itemStack))
         {
-            ItemStack var5 = var4.getStack();
-            var3 = var5.copy();
-
-            if (par2 <= 2)
+            if (!this.mergeToSingleItemStack(itemStack, TileEntityTfStorage.SLOT_INPUT_ITEM))
             {
-                if (!this.mergeItemStack(var5, 3, 38, true))
-                {
-                    return null;
-                }
-
-                var4.onSlotChange(var5, var3);
+                return TransferResult.MISMATCHED;
             }
-            else if (par2 > 2)
-            {
-                if (TfMaterialRegistry.isTfMaterial(var5))
-                {
-                    if (!this.mergeItemStack(var5, 0, 0, false))
-                    {
-                        return null;
-                    }
-                }
-                else if (par2 >= 3 && par2 < 30)
-                {
-                    if (!this.mergeItemStack(var5, 30, 38, false))
-                    {
-                        return null;
-                    }
-                }
-                else if (par2 >= 29 && par2 < 38 && !this.mergeItemStack(var5, 3, 30, false))
-                {
-                    return null;
-                }
-            }
-            else if (!this.mergeItemStack(var5, 3, 38, false))
-            {
-                return null;
-            }
-
-            if (var5.stackSize == 0)
-            {
-                var4.putStack((ItemStack)null);
-            }
-            else
-            {
-                var4.onSlotChanged();
-            }
-
-            if (var5.stackSize == var3.stackSize)
-            {
-                return null;
-            }
-
-            var4.onPickupFromSlot(par1EntityPlayer, var5);
+            return TransferResult.MATCHED;
         }
-
-        return var3;
+        return TransferResult.SKIPPING;
     }
+
 }

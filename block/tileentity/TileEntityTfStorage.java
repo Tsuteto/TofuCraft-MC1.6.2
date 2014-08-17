@@ -1,12 +1,8 @@
 package tsuteto.tofu.block.tileentity;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
@@ -22,7 +18,7 @@ import tsuteto.tofu.item.TcItem;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class TileEntityTfStorage extends TileEntity implements ISidedInventory, IFluidHandler, ITfSupplier
+public class TileEntityTfStorage extends TileEntityTfMachineSidedInventoryBase implements IFluidHandler, ITfSupplier
 {
     
     public static final int SLOT_INPUT_ITEM = 0;
@@ -33,9 +29,7 @@ public class TileEntityTfStorage extends TileEntity implements ISidedInventory, 
     private static final int[] slotForSide = new int[] {1};
     private static final int[] slotForUpper = new int[] {0};
     private static final int[] slotForLower = new int[] {2, 3};
-    
-    private ItemStack[] itemStacks = new ItemStack[4];
-    
+        
     /** For fluid handling. Synchronized with the tf amount the machine has */
     private final FluidTank fluidTank = new FluidTank(0);
 
@@ -51,119 +45,20 @@ public class TileEntityTfStorage extends TileEntity implements ISidedInventory, 
     public float tfAmount = 0;
     public float tfCapacity = 5000;
 
-    private String customName;
-    
     public TileEntityTfStorage()
     {
+        super.itemStacks = new ItemStack[4];
+        
         this.fluidTank.setFluid(new FluidStack(TcFluids.SOYMILK, 0));
         this.fluidTank.setCapacity(TfMaterialRegistry.calcSoymilkAmountFrom(this.tfCapacity));
     }
     
-    /**
-     * Returns the number of slots in the inventory.
-     */
     @Override
-    public int getSizeInventory()
+    protected String getInventoryNameTranslate()
     {
-        return this.itemStacks.length;
+        return "container.tofucraft.TfStorage";
     }
-
-    /**
-     * Returns the stack in slot i
-     */
-    @Override
-    public ItemStack getStackInSlot(int par1)
-    {
-        return this.itemStacks[par1];
-    }
-
-    /**
-     * Removes from an inventory slot (first arg) up to a specified number (second arg) of items and returns them in a
-     * new stack.
-     */
-    @Override
-    public ItemStack decrStackSize(int par1, int par2)
-    {
-        if (this.itemStacks[par1] != null)
-        {
-            ItemStack var3;
-
-            if (this.itemStacks[par1].stackSize <= par2)
-            {
-                var3 = this.itemStacks[par1];
-                this.itemStacks[par1] = null;
-                return var3;
-            }
-            else
-            {
-                var3 = this.itemStacks[par1].splitStack(par2);
-
-                if (this.itemStacks[par1].stackSize == 0)
-                {
-                    this.itemStacks[par1] = null;
-                }
-
-                return var3;
-            }
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    /**
-     * When some containers are closed they call this on each slot, then drop whatever it returns as an EntityItem -
-     * like when you close a workbench GUI.
-     */
-    @Override
-    public ItemStack getStackInSlotOnClosing(int par1)
-    {
-        if (this.itemStacks[par1] != null)
-        {
-            ItemStack var2 = this.itemStacks[par1];
-            this.itemStacks[par1] = null;
-            return var2;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    /**
-     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
-     */
-    @Override
-    public void setInventorySlotContents(int par1, ItemStack par2ItemStack)
-    {
-        this.itemStacks[par1] = par2ItemStack;
-
-        if (par2ItemStack != null && par2ItemStack.stackSize > this.getInventoryStackLimit())
-        {
-            par2ItemStack.stackSize = this.getInventoryStackLimit();
-        }
-    }
-
-    /**
-     * Returns the name of the inventory.
-     */
-    @Override
-    public String getInvName()
-    {
-        return this.isInvNameLocalized() ? this.customName : "container.tofucraft.TfStorage";
-    }
-
-	@Override
-	public boolean isInvNameLocalized() {
-		return this.customName != null && this.customName.length() > 0;
-	}
-
-    public void setCustomName(String par1Str)
-    {
-        this.customName = par1Str;
-    }
-
+    
     /**
      * Reads a tile entity from NBT.
      */
@@ -171,19 +66,6 @@ public class TileEntityTfStorage extends TileEntity implements ISidedInventory, 
     public void readFromNBT(NBTTagCompound par1NBTTagCompound)
     {
         super.readFromNBT(par1NBTTagCompound);
-        NBTTagList var2 = par1NBTTagCompound.getTagList("Items");
-        this.itemStacks = new ItemStack[this.getSizeInventory()];
-
-        for (int var3 = 0; var3 < var2.tagCount(); ++var3)
-        {
-            NBTTagCompound var4 = (NBTTagCompound)var2.tagAt(var3);
-            byte var5 = var4.getByte("Slot");
-
-            if (var5 >= 0 && var5 < this.itemStacks.length)
-            {
-                this.itemStacks[var5] = ItemStack.loadItemStackFromNBT(var4);
-            }
-        }
 
         this.processTimeInput = par1NBTTagCompound.getShort("ProcI");
         this.processTimeOutput = par1NBTTagCompound.getShort("ProcO");
@@ -196,11 +78,6 @@ public class TileEntityTfStorage extends TileEntity implements ISidedInventory, 
             this.wholeTimeOutput = (int)getItemTfAmount(new ItemStack(TcItem.bucketSoymilk));
         }
 
-        if (par1NBTTagCompound.hasKey("CustomName"))
-        {
-            this.customName = par1NBTTagCompound.getString("CustomName");
-        }
-        
         this.fluidTank.setCapacity(TfMaterialRegistry.calcSoymilkAmountFrom(this.tfCapacity));
         this.updateFluidTank();
     }
@@ -212,40 +89,12 @@ public class TileEntityTfStorage extends TileEntity implements ISidedInventory, 
     public void writeToNBT(NBTTagCompound par1NBTTagCompound)
     {
         super.writeToNBT(par1NBTTagCompound);
+        
         par1NBTTagCompound.setShort("ProcI", (short)this.processTimeInput);
         par1NBTTagCompound.setShort("ProcO", (short)this.processTimeOutput);
         par1NBTTagCompound.setShort("WholeI", (short)this.wholeTimeInput);
         par1NBTTagCompound.setFloat("TfCap", this.tfCapacity);
         par1NBTTagCompound.setFloat("TfAmount", this.tfAmount);
-        NBTTagList var2 = new NBTTagList();
-
-        for (int var3 = 0; var3 < this.itemStacks.length; ++var3)
-        {
-            if (this.itemStacks[var3] != null)
-            {
-                NBTTagCompound var4 = new NBTTagCompound();
-                var4.setByte("Slot", (byte)var3);
-                this.itemStacks[var3].writeToNBT(var4);
-                var2.appendTag(var4);
-            }
-        }
-
-        par1NBTTagCompound.setTag("Items", var2);
-
-        if (this.isInvNameLocalized())
-        {
-            par1NBTTagCompound.setString("CustomName", this.customName);
-        }
-    }
-
-    /**
-     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended. *Isn't
-     * this more of a set than a get?*
-     */
-    @Override
-    public int getInventoryStackLimit()
-    {
-        return 64;
     }
 
     @SideOnly(Side.CLIENT)
@@ -606,42 +455,10 @@ public class TileEntityTfStorage extends TileEntity implements ISidedInventory, 
         }   
     }
     
-    /**
-     * Do not make give this method the name canInteractWith because it clashes with Container
-     */
-    @Override
-    public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
-    {
-        return this.worldObj.getBlockTileEntity(this.xCoord, this.yCoord, this.zCoord) != this ? false : par1EntityPlayer.getDistanceSq(this.xCoord + 0.5D, this.yCoord + 0.5D, this.zCoord + 0.5D) <= 64.0D;
-    }
-
-    @Override
-    public void openChest() {}
-
-    @Override
-    public void closeChest() {}
-
 	@Override
 	public int[] getAccessibleSlotsFromSide(int var1) {
 		return var1 == 0 ? slotForLower : var1 == 1 ? slotForUpper : slotForSide;
 	}
-
-    @Override
-    public boolean canInsertItem(int par1, ItemStack par2ItemStack, int par3)
-    {
-        return this.isItemValidForSlot(par1, par2ItemStack);
-    }
-
-    @Override
-    public boolean canExtractItem(int par1, ItemStack par2ItemStack, int par3)
-    {
-        return true;
-    }
-
-    private int getLiveMetadata()
-    {
-        return worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
-    }
 
 	@Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack)

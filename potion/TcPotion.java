@@ -45,17 +45,19 @@ public class TcPotion
     
     public static int assignId(String confKey, Configuration conf) throws Exception
     {
+        int maxId = Math.min(127, Potion.potionTypes.length - 1);
+
         if (conf.hasKey(CONF_CATEGORY, confKey))
         {
             int id = conf.get(CONF_CATEGORY, confKey, -1).getInt();
-            if (id != -1)
+            if (id >= 0 && id <= maxId)
             {
                 return id;
             }
         }
 
         // Find an undefined entry
-        for (int i = Potion.potionTypes.length - 1; i >= 0; i--)
+        for (int i = maxId; i >= 0; i--)
         {
             Potion potion = Potion.potionTypes[i];
             if (potion == null)

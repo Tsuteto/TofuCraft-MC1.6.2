@@ -247,13 +247,13 @@ public class TcBlock extends Block
     {
         soybean = new BlockSoybean(Id.soybean.getId())
                 .setUnlocalizedName("tofucraft:blockSoybeans");
-        GameRegistry.registerBlock(soybean, "blockSoybeans");
+        GameRegistry.registerBlock(soybean, "soybeans");
         ModLoader.addName(soybean, "en_US", "Soybean");
         ModLoader.addName(soybean, "ja_JP", "大豆");
 
         soybeanHell = new BlockSoybeanHell(Id.soybeanHell.getId())
                 .setUnlocalizedName("tofucraft:blockSoybeansHell");
-        GameRegistry.registerBlock(soybeanHell, "blockSoybeansHell");
+        GameRegistry.registerBlock(soybeanHell, "soybeansHell");
         ModLoader.addName(soybeanHell, "en_US", "Hell Soybean");
         ModLoader.addName(soybeanHell, "ja_JP", "地獄大豆");
 
@@ -621,8 +621,6 @@ public class TcBlock extends Block
         MinecraftForge.setBlockHarvestLevel(tfStorageActive, "pickaxe", 0);
         ModLoader.addName(tfStorageActive, "en_US", "Tofu Force Storage");
         ModLoader.addName(tfStorageActive, "ja_JP", "豆腐フォース蓄積装置");
-
-
 
         /*
          * Ore

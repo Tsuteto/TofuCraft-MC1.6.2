@@ -32,19 +32,19 @@ public class TcAchievement extends Achievement
 
     private TcAchievement(Key key, int par3, int par4, Block block, Key relation)
     {
-        super(key.id, key.toString(), par3, par4, block, TcAchievementMgr.get(relation));
+        super(key.id, "tofucraft:" + key.toString(), par3, par4, block, TcAchievementMgr.get(relation));
         this.key = key;
     }
 
     private TcAchievement(Key key, int par3, int par4, Item item, Key relation)
     {
-        super(key.id, key.toString(), par3, par4, item, TcAchievementMgr.get(relation));
+        super(key.id, "tofucraft:" + key.toString(), par3, par4, item, TcAchievementMgr.get(relation));
         this.key = key;
     }
 
     private TcAchievement(Key key, int par3, int par4, ItemStack itemstack, Key relation)
     {
-        super(key.id, key.toString(), par3, par4, itemstack, TcAchievementMgr.get(relation));
+        super(key.id, "tofucraft:" + key.toString(), par3, par4, itemstack, TcAchievementMgr.get(relation));
         this.key = key;
     }
 
